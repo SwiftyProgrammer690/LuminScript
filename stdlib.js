@@ -1,4 +1,4 @@
-export class LuminScriptError extends Error {
+export class LuminError extends Error {
     constructor(msg) {
         super()
         this.message = msg
