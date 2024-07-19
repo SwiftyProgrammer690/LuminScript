@@ -1,0 +1,13 @@
+{
+  "name": "luminscript",
+  "version": "1.0.0",
+  "description": "LuminScript, a computer language made with Easel, for the Hackclub Arcade",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Swarit Choudhari",
+  "license": "ISC",
+  "type": "module"
+}
