@@ -1,5 +1,19 @@
 import { LuminError } from "./stdlib"
 
+export const KEYWORDS = {
+    // Print Statement (yes i'm a python main...)
+    output: 'output', // print
+    // Variables
+    variable: 'variable', // like const or var in js
+    is: 'is', // like the = when decalring variables
+    // Functions
+    function: 'function', // declare function
+    needs: 'needs', // params of func
+    // Dictionaries
+    object: 'object',
+    has: 'has',
+}
+
 export const TOKENS = {
     LeftParen: 'LeftParen',
     RightParen: 'RightParen',
@@ -47,14 +61,14 @@ export class Token {
 export class Lexer {
     constructor(program) {
         this.program = program
-        this.tokend = []
+        this.tokens = []
         this.current = 0
         this.line = 1
         this.column = 0
     }
 
     error(msg) {
-        throw new EaselError(`Error on ${this.line}:${this.column}: $msg}`)
+        throw new EaselError(`RunError on ${this.line}:${this.column}: $msg}`)
     }
 
     peek() {
@@ -68,10 +82,61 @@ export class Lexer {
         return this.program[this.current++]
     }
 
+    match(char) {
+        if (this.peek() == char) return this.advance()
+        return false
+    }
+
     scanToken() {
         const char = this.advance()
+        const isNumber = char => char >= '0' && char <= '9'
 
         switch (char) {
+            case '|': {
+                if (this.match('|'))
+                    return this.tokens.push(
+                        new Token(TOKENS.Or, '||', '||', this.line, this.column)
+                    )
+            }
+            case '>': {
+                if (this.match('='))
+                    return this.tokens.push(
+                        new Token(TOKENS.Gte, '>=', '>=', this.line, this.column)
+                    )
+                return this.tokens.push(
+                    new Token(TOKENS.Gt, '>', '>', this.line, this.column)
+                )
+            }
+            case '<': {
+                if (this.match('='))
+                    return this.tokens.push(
+                        new Token(TOKENS.Lte, '<=', '<=', this.line, this.column)
+                    )
+                return this.tokens.push(
+                    new Token(TOKENS.Lt, '<', '<', this.line, this.column)
+                )
+            }
+            case '=': {
+                if (this.match('='))
+                    return this.tokens.push(
+                        new Token(TOKENS.Equiv, '==', '==', this.line, this.column)
+                    )
+            }
+            case '&': {
+                if (this.match('&'))
+                    return this.tokens.push(
+                        new Token(TOKENS.And, '&&', '&&', this.line, this.column)
+                    )
+            }
+            case '!': {
+                if (this.match('='))
+                    return this.tokens.push(
+                        new Token(TOKENS.NotEquiv, '!=', '!=', this.line, this.column)
+                    )
+                return this.tokens.push(
+                    new Token(TOKENS.Not, '!', '!', this.line, this.column)
+                )
+            }
             case '(': {
                 return this.tokens.push(
                     new Token(TOKENS.LeftParen, '(', '(', this.line, this.column)
@@ -151,6 +216,22 @@ export class Lexer {
                     new Token(TOKENS.String, string, string, this.line, this,column)
                 )
             }
+            default:
+                if (isNumber(char)) {
+                    let number =[char]
+                    while (isNumber(this.peek()) || (this.peek() === "." && !number.includes(".")))
+                        number.push(this.advance())
+                    number = number.join("")
+                    return this.tokens.push(
+                        new Token(
+                            TOKENS.Number,
+                            number,
+                            Number(number),
+                            this.line,
+                            this.column
+                        )
+                    )
+                }
         }
     }
 
